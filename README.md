@@ -1,6 +1,7 @@
 # Principia
 ## Experiments in Prince of Persia, 1989 using Reinforcment Learning.
-![running code](images/run.png)
+
+<video src="assets/demo.mp4" width="600" controls></video>
 
 Currently able to get the sword!
 
