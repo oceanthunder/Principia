@@ -53,10 +53,22 @@ docker pull oceanthunder/principia
 
 ```bash
 xhost +local:docker
-docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --gpus all -p 6006:6006 oceanthunder/principia
+docker run --rm -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name principia --gpus all -p 6006:6006 oceanthunder/principia
 ```
 
 after which run multippo.py to start the training [change the num_cpu param in multippo.py file to inc/dec the no. of environments in parallel]
+
+To access logs, open a new terminal and then:
+```bash
+docker exec -it principia /bin/bash
+```
+
+now, inside the container, type:
+```bash
+tensorboard --logdir logs --port 6006 --bind_all
+```
+
+Then, open up a browser and visit http://localhost:6006 to see tensorboard logs!
 
 #### Manual (if you are real serious about this):
 
