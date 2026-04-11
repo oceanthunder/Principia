@@ -42,16 +42,36 @@ The agent can perform 5 actions: `Up`, `Down`, `Left`, `Right` along with one `N
 
 
 ## How to run it on your machine?
+
+---
+#### Docker (recommended):
+
+Using the docker image is much simpler, available at: [Docker Hub](https://hub.docker.com/r/oceanthunder/principia)
+
+```bash
+docker pull oceanthunder/principia
+```
+
+```bash
+xhost +local:docker
+docker run -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --gpus all -p 6006:6006 oceanthunder/principia
+```
+
+after which run multippo.py to start the training [change the num_cpu param in multippo.py file to inc/dec the no. of environments in parallel]
+
+---
+
+---
+#### Manual (if you are real serious about this):
+
 Recompile the game as mentioned above.
 
 Use python version 3.12.12 (might work on other python versions, haven't tested)
 
 pip install the requirements.txt file
 
-run the ppo.py file for single environment training.
-
-run the multip_ppo.py file for 12 environments in parallel training.
-
+run the multippo.py file to start training 
+---
 
 
 ## Notes for meself
