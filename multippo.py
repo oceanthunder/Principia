@@ -9,17 +9,16 @@ from POP_env import POPEnv
 
 def make_env(rank, mode, seed=0):
     def _init():
-        # Mode Logic
-        if mode == "1": # One window (only rank 0)
+        if mode == "1":
             if rank == 0:
                 if "SDL_VIDEODRIVER" in os.environ: del os.environ["SDL_VIDEODRIVER"]
             else:
                 os.environ["SDL_VIDEODRIVER"] = "dummy"
         
-        elif mode == "2": # All windows
+        elif mode == "2":
             if "SDL_VIDEODRIVER" in os.environ: del os.environ["SDL_VIDEODRIVER"]
             
-        elif mode == "3": # Headless (no windows)
+        elif mode == "3":
             os.environ["SDL_VIDEODRIVER"] = "dummy"
 
         env = POPEnv()
@@ -31,7 +30,6 @@ def make_env(rank, mode, seed=0):
     return _init
 
 def train(mode):
-    # Recommended for i5-9300H: 4 to 8. 12 is overkill for 8 threads.
     num_cpu = 6 
     
     print(f"Mode selected: {mode}")
@@ -46,7 +44,7 @@ def train(mode):
         learning_rate=2.5e-4,
         n_steps=4096,
         batch_size=1024,     
-        n_epochs=10, # Reduced to 10 for better stability on mobile CPUs
+        n_epochs=10,
         verbose=1,
         tensorboard_log="logs/",
         device="cuda"
@@ -70,4 +68,3 @@ if __name__ == "__main__":
     else:
         user_mode = sys.argv[1]
         train(user_mode)
-
