@@ -2,8 +2,8 @@ from gymnasium import Env, spaces
 import numpy as np
 from ctypes import CDLL, c_int, c_short
 import os
-from PIL import Image
 import ctypes
+import cv2
 
 class POPEnv(Env):
 
@@ -27,8 +27,8 @@ class POPEnv(Env):
         self.curr_room = c_int.in_dll(self.lib, "curr_room")
         self.guardhp_curr = c_short.in_dll(self.lib, "guardhp_curr")
         self.guardhp_prev = 0
-        self.frame_buffer = (ctypes.c_ubyte*(320*200*3))()
-        self.lib.rl_get_frame.argtypes = [ctypes.POINTER(ctypes.c_ubyte *(320*200*3))]
+        self.frame_buffer = (ctypes.c_ubyte * (320 * 200 * 3))()
+        self.lib.rl_get_frame.argtypes = [ctypes.POINTER(ctypes.c_ubyte * (320 * 200 * 3))]
         self.lib.rl_get_frame.restype = None
         self.rl_step_mode.value = 1
         self.start_level.value = 1
@@ -36,8 +36,8 @@ class POPEnv(Env):
 
         #init shit
         self.init_game = self.lib.init_game
- 
-        # 0=NONE, 1=LEFT, 2=RIGHT, 3=UP, 4=DOWN, 5=SHIFT
+
+        #0=NONE, 1=LEFT, 2=RIGHT, 3=UP, 4=DOWN, 5=SHIFT
         self.action_space = spaces.Discrete(6)
         
         self.observation_space = spaces.Dict({
@@ -49,7 +49,7 @@ class POPEnv(Env):
         self.step_count = 0
         self.max_steps = 2000000
         self.prev_hp = None
-    
+
     def _get_obs(self) -> dict:
         self.lib.rl_get_frame(ctypes.byref(self.frame_buffer))
 
@@ -59,11 +59,14 @@ class POPEnv(Env):
         is_alive = 1.0 if self.rl_kid_dead.value == 0 else 0.0
 
         state = np.array([norm_hitp_curr, norm_hitp_max, norm_current_level, is_alive], dtype=np.float32)
+
         pixels = np.frombuffer(self.frame_buffer, dtype=np.uint8).reshape((200, 320, 3))
-        img = Image.fromarray(pixels).convert('L').resize((84, 84), Image.BILINEAR)
-        pixels = np.array(img, dtype=np.uint8)[:, :, np.newaxis]
+        gray = cv2.cvtColor(pixels, cv2.COLOR_RGB2GRAY)   
+        resized = cv2.resize(gray, (84, 84), interpolation=cv2.INTER_LINEAR) 
+        pixels = resized[:, :, np.newaxis]               
+
         return {"pixels": pixels, "state": state}
-    
+
     def reset(self, seed=None, options=None):
         super().reset(seed=seed, options=options)
 
@@ -85,16 +88,14 @@ class POPEnv(Env):
 
         return obs, info
 
-    
     def step(self, action: int):
         self.rl_action.value = action
         
         step_reward = 0.0
-        num_skip = 4 #frameskips
+        num_skip = 4
         terminated = False
 
         for _ in range(num_skip):
-
             self.lib.play_level_2()
             self.step_count += 1
             current_hp = self.hitp_curr.value
@@ -102,7 +103,6 @@ class POPEnv(Env):
 
             if self.prev_hp is not None and current_hp < self.prev_hp:
                 frame_reward -= 1
-            #potions
             if self.prev_hp is not None and current_hp > self.prev_hp:
                 frame_reward += 1
 
@@ -122,7 +122,7 @@ class POPEnv(Env):
 
             room_id = self.curr_room.value
             if room_id not in self.visited_rooms:
-                frame_reward += 4 
+                frame_reward += 4
                 self.visited_rooms.add(room_id)
 
             guardhp_curr = self.guardhp_curr.value
@@ -140,11 +140,11 @@ class POPEnv(Env):
 
             if terminated:
                 break
-        
+
         self.total_reward += step_reward
         obs = self._get_obs()
         truncated = self.step_count >= self.max_steps
-        
+
         info = {
             "hp": self.hitp_curr.value,
             "step": self.step_count,
@@ -153,7 +153,6 @@ class POPEnv(Env):
         }
 
         return obs, step_reward, terminated, truncated, info
-    
+
     def close(self):
         self.rl_step_mode.value = 0
-
