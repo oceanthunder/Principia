@@ -53,7 +53,7 @@ docker pull oceanthunder/principia
 
 ```bash
 xhost +local:docker
-docker run --rm -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name principia --gpus all -p 6006:6006 oceanthunder/principia
+docker run --rm -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name principia --gpus all --ipc=host -p 6006:6006 oceanthunder/principia
 ```
 
 after which run multippo.py to start the training [change the num_cpu param in multippo.py file to inc/dec the no. of environments in parallel]
