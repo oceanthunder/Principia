@@ -57,6 +57,16 @@ docker run --rm -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix --name 
 ```
 
 after which run multippo.py to start the training [change the num_cpu param in multippo.py file to inc/dec the no. of environments in parallel]
+| Command | Mode |
+| :--- | :--- |
+| `python multippo.py 1` | **Single Window** (Only 1 GUI opens) |
+| `python multippo.py 2` | **All Windows** (GUI for every environment) |
+| `python multippo.py 3` | **Headless** (No windows, fastest) |
+
+**Example:**
+```bash
+python multippo.py 1
+```
 
 To access logs, open a new terminal and then:
 ```bash
@@ -84,3 +94,4 @@ run the multippo.py file to start training
 
 ## Notes for meself
 nm -D ./SDLPoP/src/libSDLPoP.so [very useful command to find what methods are available in libSDLPop.so file, just pipe em up!]
+
